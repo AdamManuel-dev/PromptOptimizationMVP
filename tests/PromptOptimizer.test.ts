@@ -40,7 +40,7 @@ describe('PromptOptimizer', () => {
 
       const results = await optimizer.batchOptimize(prompts, options);
       expect(results).toHaveLength(3);
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(typeof result).toBe('string');
       });
     });
@@ -67,7 +67,7 @@ describe('PromptOptimizer', () => {
 
       const results = await optimizer.compareVariations(variations, testData);
       expect(Object.keys(results)).toHaveLength(2);
-      variations.forEach(variation => {
+      variations.forEach((variation) => {
         expect(results[variation]).toHaveProperty('accuracy');
       });
     });
@@ -83,7 +83,7 @@ describe('PromptOptimizer', () => {
 
       const results = await optimizer.compareModels(options);
       expect(Object.keys(results)).toHaveLength(3);
-      options.models.forEach(model => {
+      options.models.forEach((model) => {
         expect(results[model]).toHaveProperty('performance');
         expect(results[model]).toHaveProperty('cost');
       });
@@ -95,7 +95,7 @@ describe('PromptOptimizer', () => {
       const options = {
         prompt: 'Initial prompt',
         testData: [{ input: 'test', expected: 'output' }],
-        evaluator: (response: any, expected: any) => Math.random(),
+        evaluator: (_response: any, _expected: any) => Math.random(),
         maxIterations: 10,
       };
 
