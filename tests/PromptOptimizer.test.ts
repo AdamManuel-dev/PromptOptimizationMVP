@@ -16,7 +16,10 @@ describe('PromptOptimizer', () => {
     it('should return an optimized prompt', async () => {
       const basePrompt = 'Explain {topic} in simple terms';
       const options = {
-        testCases: ['physics', 'chemistry'],
+        testCases: [
+          { input: 'physics', expectedOutput: 'Simple physics explanation' },
+          { input: 'chemistry', expectedOutput: 'Simple chemistry explanation' },
+        ],
         iterations: 5,
         targetMetric: 'accuracy',
       };
@@ -49,7 +52,7 @@ describe('PromptOptimizer', () => {
   describe('evaluate', () => {
     it('should return evaluation metrics', async () => {
       const prompt = 'Test prompt';
-      const testData = [{ input: 'test', expected: 'output' }];
+      const testData = [{ id: '1', content: 'test', metadata: { expected: 'output' } }];
 
       const result = await optimizer.evaluate(prompt, testData);
       expect(result).toHaveProperty('accuracy');
@@ -63,7 +66,7 @@ describe('PromptOptimizer', () => {
   describe('compareVariations', () => {
     it('should compare multiple prompt variations', async () => {
       const variations = ['Variation 1', 'Variation 2'];
-      const testData = [{ input: 'test', expected: 'output' }];
+      const testData = [{ id: '1', content: 'test', metadata: { expected: 'output' } }];
 
       const results = await optimizer.compareVariations(variations, testData);
       expect(Object.keys(results)).toHaveLength(2);
@@ -78,7 +81,7 @@ describe('PromptOptimizer', () => {
       const options = {
         prompt: 'Test prompt',
         models: ['gpt-4', 'claude-3', 'llama-2'],
-        testCases: [{ input: 'test' }],
+        testCases: [{ input: 'test', expectedOutput: 'output' }],
       };
 
       const results = await optimizer.compareModels(options);
@@ -94,8 +97,8 @@ describe('PromptOptimizer', () => {
     it('should run complete optimization cycle', async () => {
       const options = {
         prompt: 'Initial prompt',
-        testData: [{ input: 'test', expected: 'output' }],
-        evaluator: (_response: any, _expected: any) => Math.random(),
+        testData: [{ id: '1', content: 'test', metadata: { expected: 'output' } }],
+        evaluator: (_response: string, _expected: string) => Math.random(),
         maxIterations: 10,
       };
 

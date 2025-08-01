@@ -1,3 +1,15 @@
+export interface TestCase {
+  input: string;
+  expectedOutput?: string;
+  context?: Record<string, unknown>;
+}
+
+export interface TestDataItem {
+  id: string;
+  content: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface OptimizerConfig {
   model: string;
   evaluationMetrics: string[];
@@ -5,8 +17,8 @@ export interface OptimizerConfig {
 }
 
 export interface OptimizationOptions {
-  testCases?: any[];
-  testData?: any[];
+  testCases?: TestCase[];
+  testData?: TestDataItem[];
   testProducts?: string[];
   iterations?: number;
   maxIterations?: number;

@@ -3,7 +3,10 @@ import type {
   OptimizationOptions,
   OptimizationResult,
   EvaluationResult,
+  TestDataItem,
+  TestCase,
 } from '../types/index.js';
+import type { PromptTemplate } from '../templates/PromptTemplate.js';
 
 export class PromptOptimizer {
   private config: OptimizerConfig;
@@ -36,7 +39,7 @@ export class PromptOptimizer {
     return Promise.all(prompts.map((prompt) => this.optimize(prompt, options)));
   }
 
-  async evaluate(_prompt: string, _testData: any[]): Promise<EvaluationResult> {
+  async evaluate(_prompt: string, _testData: TestDataItem[]): Promise<EvaluationResult> {
     return {
       accuracy: Math.random(),
       relevance: Math.random(),
@@ -46,7 +49,7 @@ export class PromptOptimizer {
 
   async compareVariations(
     variations: string[],
-    testData: any[]
+    testData: TestDataItem[]
   ): Promise<Record<string, EvaluationResult>> {
     const results: Record<string, EvaluationResult> = {};
 
@@ -60,9 +63,9 @@ export class PromptOptimizer {
   async compareModels(options: {
     prompt: string;
     models: string[];
-    testCases: any[];
-  }): Promise<Record<string, any>> {
-    const results: Record<string, any> = {};
+    testCases: TestCase[];
+  }): Promise<Record<string, { performance: number; cost: number }>> {
+    const results: Record<string, { performance: number; cost: number }> = {};
 
     for (const model of options.models) {
       results[model] = {
@@ -76,8 +79,8 @@ export class PromptOptimizer {
 
   async runOptimization(options: {
     prompt: string;
-    testData: any[];
-    evaluator: (response: any, expected: any) => number;
+    testData: TestDataItem[];
+    evaluator: (response: string, expected: string) => number;
     maxIterations: number;
   }): Promise<OptimizationResult> {
     const optimizedPrompt = await this.optimize(options.prompt, {
@@ -97,7 +100,7 @@ export class PromptOptimizer {
     };
   }
 
-  async findBestVariation(template: any): Promise<string> {
+  async findBestVariation(template: PromptTemplate): Promise<string> {
     const variations = template.generate();
     const scores = await Promise.all(
       variations.map(async (v: string) => ({ variation: v, score: Math.random() }))
