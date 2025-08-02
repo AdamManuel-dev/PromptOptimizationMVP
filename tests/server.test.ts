@@ -16,7 +16,7 @@ jest.mock('../src/database/index.js', () => ({
 
 describe('Server', () => {
   let app: Application;
-  let server: any;
+  let server: ReturnType<typeof createServer>;
 
   beforeAll(() => {
     // Load test environment
@@ -30,7 +30,7 @@ describe('Server', () => {
 
     loadEnvironment('test');
     server = createServer();
-    app = server.getApp();
+    app = (server as ReturnType<typeof createServer>).getApp();
   });
 
   afterAll(async () => {

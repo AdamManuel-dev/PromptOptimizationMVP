@@ -10,6 +10,7 @@
 
 import { loadEnvironment } from './config/index.js';
 import { startServer } from './server/index.js';
+import { logger } from './utils/logger.js';
 
 async function main() {
   try {
@@ -19,7 +20,7 @@ async function main() {
     // Start the server
     await startServer();
 
-    console.log('Application started successfully');
+    logger.info('Application started successfully');
   } catch (error) {
     console.error('Failed to start application:', error);
     process.exit(1);

@@ -14,10 +14,13 @@ import helmet from 'helmet';
 import compression from 'compression';
 import bodyParser from 'body-parser';
 import rateLimit from 'express-rate-limit';
+import { Server as HttpServer } from 'http';
 import { getConfig, isDevelopment } from '../config/index.js';
 import { initializeDatabase, healthCheck, shutdownDatabase } from '../database/index.js';
+import { logger } from '../utils/logger.js';
 
-// Import routers (to be created)
+// Import routers
+// import claudeRouter from './routes/claude.js';
 // import { promptRouter } from './routes/prompts.js';
 // import { analysisRouter } from './routes/analysis.js';
 // import { optimizationRouter } from './routes/optimization.js';
@@ -30,7 +33,7 @@ export interface ServerOptions {
 
 class Server {
   private app: Application;
-  private server: any;
+  private server: HttpServer | null = null;
   private isShuttingDown = false;
 
   constructor() {
@@ -79,7 +82,7 @@ class Server {
     // Request logging in development
     if (isDevelopment()) {
       this.app.use((req: Request, res: Response, next: NextFunction) => {
-        console.log(`${req.method} ${req.path}`);
+        logger.info(`${req.method} ${req.path}`);
         next();
       });
     }
@@ -114,7 +117,8 @@ class Server {
       }
     });
 
-    // API routes (to be implemented)
+    // API routes
+    // this.app.use(`${apiPrefix}/claude`, claudeRouter);
     // this.app.use(`${apiPrefix}/prompts`, promptRouter);
     // this.app.use(`${apiPrefix}/analysis`, analysisRouter);
     // this.app.use(`${apiPrefix}/optimization`, optimizationRouter);
@@ -149,7 +153,7 @@ class Server {
     this.app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
       console.error('Unhandled error:', err);
 
-      const status = (err as any).status || 500;
+      const status = (err as Error & { status?: number }).status || 500;
       const message = isDevelopment() ? err.message : 'Internal server error';
 
       res.status(status).json({
@@ -164,16 +168,16 @@ class Server {
     try {
       // Initialize database
       await initializeDatabase();
-      console.log('Database initialized');
+      logger.info('Database initialized');
 
       const config = getConfig();
       const port = options.port || config.port;
       const host = options.host || '0.0.0.0';
 
       this.server = this.app.listen(port, host, () => {
-        console.log(`Server running on http://${host}:${port}`);
-        console.log(`Environment: ${config.env}`);
-        console.log(`API Version: ${config.apiVersion}`);
+        logger.info(`Server running on http://${host}:${port}`);
+        logger.info(`Environment: ${config.env}`);
+        logger.info(`API Version: ${config.apiVersion}`);
       });
 
       // Handle graceful shutdown
@@ -191,17 +195,17 @@ class Server {
     }
 
     this.isShuttingDown = true;
-    console.log('\nShutting down server gracefully...');
+    logger.info('\nShutting down server gracefully...');
 
     // Stop accepting new connections
     if (this.server) {
       this.server.close(async () => {
-        console.log('HTTP server closed');
+        logger.info('HTTP server closed');
 
         // Close database connections
         await shutdownDatabase();
 
-        console.log('Shutdown complete');
+        logger.info('Shutdown complete');
         process.exit(0);
       });
 

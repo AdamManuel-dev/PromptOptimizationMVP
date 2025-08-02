@@ -15,6 +15,9 @@ export default {
       },
     ],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(p-retry|retry)/)',
+  ],
   testMatch: [
     '**/tests/**/*.test.ts',
     '**/__tests__/**/*.test.ts'

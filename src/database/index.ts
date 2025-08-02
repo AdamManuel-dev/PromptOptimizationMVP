@@ -10,6 +10,7 @@
 
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 import { getConfig, isDevelopment } from '../config/index.js';
+import { logger } from '../utils/logger.js';
 
 export interface QueryOptions {
   client?: PoolClient;
@@ -55,7 +56,7 @@ class DatabaseManager {
       const client = await this.pool.connect();
       await client.query('SELECT 1');
       client.release();
-      console.log('Database connection established');
+      logger.info('Database connection established');
     } catch (error) {
       console.error('Failed to connect to database:', error);
       throw error;
@@ -69,15 +70,15 @@ class DatabaseManager {
     return this.pool;
   }
 
-  async query<T extends QueryResultRow = any>(
+  async query<T extends QueryResultRow = QueryResultRow>(
     text: string,
-    params?: any[],
+    params?: unknown[],
     options?: QueryOptions
   ): Promise<QueryResult<T>> {
     const { client, logQuery = false } = options || {};
 
     if (logQuery || isDevelopment()) {
-      console.log('Query:', text, params);
+      logger.info(`Query: ${text}`, params);
     }
 
     const startTime = Date.now();
@@ -132,11 +133,11 @@ class DatabaseManager {
     }
 
     this.isShuttingDown = true;
-    console.log('Shutting down database connection pool...');
+    logger.info('Shutting down database connection pool...');
 
     try {
       await this.pool.end();
-      console.log('Database connection pool closed');
+      logger.info('Database connection pool closed');
     } catch (error) {
       console.error('Error shutting down database pool:', error);
     } finally {
@@ -149,9 +150,9 @@ class DatabaseManager {
 // Export singleton instance methods
 export const db = DatabaseManager.getInstance();
 export const initializeDatabase = () => db.initialize();
-export const query = <T extends QueryResultRow = any>(
+export const query = <T extends QueryResultRow = QueryResultRow>(
   text: string,
-  params?: any[],
+  params?: unknown[],
   options?: QueryOptions
 ) => db.query<T>(text, params, options);
 export const transaction = <T>(callback: (client: PoolClient) => Promise<T>) =>
